@@ -1,12 +1,15 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useMemo, useState} from "react";
 
 const Home = () => {
-    const [calorieGoal, setCalorieGoal] = useState(localStorage.getItem('CalorieGoal'));
+    const [calorieGoal, setCalorieGoal] = useState(parseInt(localStorage.getItem('CalorieGoal')));
     const [currentCalories, setCurrentCalories] = useState(0);
     const [caloriesLeft, setCaloriesLeft] = useState(0);
     const [calorieInput, setCalorieInput] = useState(0);
     const [foodName, setFoodName] = useState('');
-    const [foodList, setFoodList] = useState([]);
+    const [foodList, setFoodList] = useState([{
+        FoodName: '',
+        FoodCalories: 0
+    }]);
     const [tempCalorieInput, setTempCalorieInput] = useState(0);
     const [foodListRender, setFoodListRender] = useState();
     const [resetCalorie, setResetCalorie] = useState();
@@ -29,8 +32,11 @@ const Home = () => {
             FoodName: foodName,
             FoodCalories: calorieInput
         }
-        setFoodList(foodList.push(food));
-
+        console.log(foodList);
+        var tempArray = foodList;
+        tempArray.push(food);
+        setFoodList(tempArray);
+        console.log(foodList);
         setCalorieInput(0);
         setFoodName('');
     }
@@ -38,11 +44,6 @@ const Home = () => {
     
     function handleFoodNameChange({target}) {
         setFoodName(target.value);
-    }
-
-    function handleCalorieInputChange({target}) {
-        var inputValue = handleNumber(target.value);
-        setCalorieInput(inputValue);
     }
 
     //Update Calorie Sum when food list is updated
@@ -100,16 +101,14 @@ const Home = () => {
     }, [calorieGoal, currentCalories]);
 
     //render the food list under the food input hen foodList Changes
-    useEffect(() => {
-        setFoodListRender(() => {
-            foodList.map((e) => {
-                <li id={e.FoodName}>
-                    <h1>{e.foodName}</h1>
+    const renderFoodList = useMemo(() => {
+            foodList.map((e) => (
+                <li key={toString(e.FoodName + foodList.indexOf(e))}>
+                    <h1>{e.FoodName}</h1>
                     <h2>{e.FoodCalories}</h2>
-                    <button onClick={DeleteFood(e)}>Delete</button>
+                    <button onClick={DeleteFood(e)} >Delete Food</button>
                 </li>
-            });
-        })
+            ))
     }, [foodList]);
 
     return (
@@ -122,12 +121,15 @@ const Home = () => {
                 <input type='text' value={foodName} placeholder="Food Name" onChange={handleFoodNameChange} />
                 <br />
                 <label>Calories</label>
-                <input type='number' value={calorieInput} onChange={handleCalorieInputChange} />
+                <input type='number' value={calorieInput} onChange={({target}) => {
+                    var inputValue = handleNumber(target.value);
+                    setCalorieInput(inputValue);
+                }} />
                 <br />
                 <input type='button' value='Add Food' onClick={AddCalories} />
             </div>
             <ol>
-                {foodListRender}
+                {renderFoodList}
             </ol>
         </div>
     );
