@@ -6,16 +6,15 @@ const Home = () => {
     const [caloriesLeft, setCaloriesLeft] = useState(0);
     const [calorieInput, setCalorieInput] = useState(0);
     const [foodName, setFoodName] = useState('');
-    const [foodList, setFoodList] = useState([{
-        FoodName: '',
-        FoodCalories: 0
-    }]);
+    const [foodList, setFoodList] = useState([]);
+    const [foodListRender, setFoodListRender] = useState([]);
     const [tempCalorieInput, setTempCalorieInput] = useState(0);
-    const [foodListRender, setFoodListRender] = useState();
     const [resetCalorie, setResetCalorie] = useState();
 
-    function DeleteFood(food) {
-        delete foodList[foodList.indexOf(food)];
+    function DeleteFood(index) {
+        var newFoodList = [...foodList];
+        newFoodList.splice(index, 1);
+        setFoodList(newFoodList);
     }
 
     
@@ -28,19 +27,34 @@ const Home = () => {
     }
 
     function AddCalories() {
-        const food = {
+        if(Number.isNaN(calorieInput) || foodName.length === 0) {
+            alert('Input is empty');
+            return;
+        }
+        var food = {
             FoodName: foodName,
             FoodCalories: calorieInput
         }
-        console.log(foodList);
-        var tempArray = foodList;
-        tempArray.push(food);
-        setFoodList(tempArray);
-        console.log(foodList);
+        //logging foodList to make sure it updates
+        //console.log(foodList);
+        //pusing the new food to the foodList array
+        setFoodList([...foodList, food]);
+        //logging foodList to make sure it updated
+        //console.log(foodList);
+        //reseting input feilds
         setCalorieInput(0);
         setFoodName('');
     }
-    
+
+    useEffect(() => {
+        setFoodListRender(foodList.map(e =>
+            <li key={e.FoodName + toString(foodList.indexOf(e))}>
+                <h1>{e.FoodName}</h1>
+                <h2>{e.FoodCalories}</h2>
+                <button onClick={DeleteFood(foodList.indexOf(e))} >Delete Food</button>
+            </li>
+        ));
+    }, [foodList.length]);
     
     function handleFoodNameChange({target}) {
         setFoodName(target.value);
@@ -55,7 +69,7 @@ const Home = () => {
         });
 
         setCurrentCalories(calorieSum);
-    }, [foodList])
+    }, [foodList.length])
 
     //Set Calorie Goal Value on first render
     const inputGoalRender = (
@@ -101,15 +115,10 @@ const Home = () => {
     }, [calorieGoal, currentCalories]);
 
     //render the food list under the food input hen foodList Changes
-    const renderFoodList = useMemo(() => {
-            foodList.map((e) => (
-                <li key={toString(e.FoodName + foodList.indexOf(e))}>
-                    <h1>{e.FoodName}</h1>
-                    <h2>{e.FoodCalories}</h2>
-                    <button onClick={DeleteFood(e)} >Delete Food</button>
-                </li>
-            ))
-    }, [foodList]);
+
+    const foodListLength = useMemo(() => {
+        return (<h1>{foodList.length}</h1>);
+    }, [foodList.length]);
 
     return (
         <div>
@@ -129,8 +138,9 @@ const Home = () => {
                 <input type='button' value='Add Food' onClick={AddCalories} />
             </div>
             <ol>
-                {renderFoodList}
+                {foodListRender}
             </ol>
+            {foodListLength}
         </div>
     );
 }
