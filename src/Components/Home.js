@@ -7,11 +7,12 @@ const Home = () => {
     const [calorieInput, setCalorieInput] = useState(0);
     const [foodName, setFoodName] = useState('');
     const [foodList, setFoodList] = useState([]);
-    const [foodListRender, setFoodListRender] = useState([]);
+    // const [foodListRender, setFoodListRender] = useState([]);
     const [tempCalorieInput, setTempCalorieInput] = useState(0);
     const [resetCalorie, setResetCalorie] = useState();
 
-    function DeleteFood(index) {
+    function DeleteFood(food) {
+        var index = foodList.indexOf(food);
         var newFoodList = [...foodList];
         newFoodList.splice(index, 1);
         setFoodList(newFoodList);
@@ -31,45 +32,33 @@ const Home = () => {
             alert('Input is empty');
             return;
         }
-        var food = {
+
+        var newFood = {
             FoodName: foodName,
             FoodCalories: calorieInput
-        }
-        //logging foodList to make sure it updates
-        //console.log(foodList);
-        //pusing the new food to the foodList array
-        setFoodList([...foodList, food]);
-        //logging foodList to make sure it updated
-        //console.log(foodList);
+        };
+
+        setFoodList([...foodList, newFood]);
+
         //reseting input feilds
         setCalorieInput(0);
         setFoodName('');
     }
-
-    useEffect(() => {
-        setFoodListRender(foodList.map(e =>
-            <li key={e.FoodName + toString(foodList.indexOf(e))}>
-                <h1>{e.FoodName}</h1>
-                <h2>{e.FoodCalories}</h2>
-                <button onClick={DeleteFood(foodList.indexOf(e))} >Delete Food</button>
-            </li>
-        ));
-    }, [foodList.length]);
     
     function handleFoodNameChange({target}) {
         setFoodName(target.value);
     }
 
     //Update Calorie Sum when food list is updated
-    useEffect(() => {
-        var calorieSum = 0;
+    // useEffect(() => {
+    //     var calorieSum = 0;
         
-        foodList.forEach((food) => {
-            calorieSum += food.FoodCalories;
-        });
+    //     foodList.forEach((food) => {
+    //         calorieSum += food.FoodCalories;
+    //     });
 
-        setCurrentCalories(calorieSum);
-    }, [foodList.length])
+    //     setCurrentCalories(calorieSum);
+    // }, [foodList.length])
 
     //Set Calorie Goal Value on first render
     const inputGoalRender = (
@@ -120,6 +109,17 @@ const Home = () => {
         return (<h1>{foodList.length}</h1>);
     }, [foodList.length]);
 
+    const foodRender = useMemo(() => (
+        foodList.map(e =>
+        <li key={e.FoodCalories + foodList.indexOf(e)}>
+            <h1>{e.FoodName}</h1>
+            <h2>{e.FoodCalories}</h2>
+            <button onClick={() => {
+                DeleteFood(e)
+            }} >Delete Food</button>
+        </li>
+        )), [foodList.length]);
+
     return (
         <div>
             <h1>Hello Calories</h1>
@@ -138,7 +138,7 @@ const Home = () => {
                 <input type='button' value='Add Food' onClick={AddCalories} />
             </div>
             <ol>
-                {foodListRender}
+                {foodRender}
             </ol>
             {foodListLength}
         </div>
