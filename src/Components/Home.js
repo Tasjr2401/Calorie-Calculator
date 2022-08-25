@@ -6,7 +6,11 @@ const Home = () => {
     const [caloriesLeft, setCaloriesLeft] = useState(0);
     const [calorieInput, setCalorieInput] = useState(0);
     const [foodName, setFoodName] = useState('');
-    const [foodList, setFoodList] = useState([]);
+    var foodArray = JSON.parse(localStorage.getItem('FoodList'));
+    if(!foodArray) {
+        foodArray = [];
+    }
+    const [foodList, setFoodList] = useState(foodArray);
     // const [foodListRender, setFoodListRender] = useState([]);
     const [tempCalorieInput, setTempCalorieInput] = useState(0);
     const [resetCalorie, setResetCalorie] = useState();
@@ -44,21 +48,25 @@ const Home = () => {
         setCalorieInput(0);
         setFoodName('');
     }
+
+    useEffect(() => {
+        localStorage.setItem('FoodList', JSON.stringify(foodList));
+    }, [foodList.length]);
     
     function handleFoodNameChange({target}) {
         setFoodName(target.value);
     }
 
     //Update Calorie Sum when food list is updated
-    // useEffect(() => {
-    //     var calorieSum = 0;
+    useEffect(() => {
+        var calorieSum = 0;
         
-    //     foodList.forEach((food) => {
-    //         calorieSum += food.FoodCalories;
-    //     });
+        foodList.forEach((food) => {
+            calorieSum += food.FoodCalories;
+        });
 
-    //     setCurrentCalories(calorieSum);
-    // }, [foodList.length])
+        setCurrentCalories(calorieSum);
+    }, [foodList.length])
 
     //Set Calorie Goal Value on first render
     const inputGoalRender = (
