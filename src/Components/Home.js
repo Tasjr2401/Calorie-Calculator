@@ -1,4 +1,5 @@
 import React, {useEffect, useMemo, useState} from "react";
+import { handleNumber } from "./UsefulFunctions";
 
 const Home = () => {
     const [calorieGoal, setCalorieGoal] = useState(parseInt(localStorage.getItem('CalorieGoal')));
@@ -23,13 +24,13 @@ const Home = () => {
     }
 
     
-    function handleNumber(num) {
-        var tempVar = parseInt(num);
-        if(Number.isNaN(tempVar)) {
-            return 0;
-        }
-        return tempVar;
-    }
+    // function handleNumber(num) {
+    //     var tempVar = parseInt(num);
+    //     if(Number.isNaN(tempVar)) {
+    //         return 0;
+    //     }
+    //     return tempVar;
+    // }
 
     function AddCalories() {
         if(Number.isNaN(calorieInput) || foodName.length === 0) {
