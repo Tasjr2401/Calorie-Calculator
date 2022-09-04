@@ -6,3 +6,4 @@ export function handleNumber(num) {
     }
     return tempVar;
 }
+

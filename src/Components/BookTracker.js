@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { handleNumber } from "./UsefulFunctions";
+import '../Style.css';
 
 const BookTracker = () => {
     const [bookTitle, setBookTitle] = useState('');
@@ -16,14 +17,26 @@ const BookTracker = () => {
     })
 
     function AddBook() {
-        var tempArray = [...bookList, {
+        var tempArray = [{
             Title: bookTitle,
             Author: bookAuthor,
             PagesRead: pagesRead,
             Completed: false,
             LastUpdated: new Date()
-        }];
+        }, ...bookList];
 
+        setBookList(tempArray);
+    }
+
+    function UpdateCompleted(e) {
+        var tempArray = [...bookList];
+        var index = tempArray.indexOf(e);
+        tempArray[index].Completed = !e.Completed;
+        tempArray[index].LastUpdated = Date.now();
+
+        tempArray.sort((a, b) => {
+            return -1*(a.LastUpdated - b.LastUpdated);
+        });
         setBookList(tempArray);
     }
 
@@ -31,29 +44,32 @@ const BookTracker = () => {
         localStorage.setItem('BookList', JSON.stringify(bookList));
     }, [bookList]);
 
-    const bookListRender = useMemo(() => 
+    const [toReadListRender, finishedListRender] = useMemo(() => {
+        var readingListArray = [];
+        var finishedListArray = [];
         bookList.map(e => {
             var date = new Date(e.LastUpdated);
-            date = date.toLocaleDateString('en-US', {
-                month: 'long',
-                day: 'numeric',
-                year: 'numeric'
-            });
-            return (<li key={bookList.indexOf(e)}>
-                <h1>{e.Title}</h1>
-                <h2>By {e.Author}</h2>
-                <h3>Pages Read: {e.PagesRead}</h3>
-                <label>Completed: </label>
-                <input checked={e.Completed} type='checkbox' onChange={() => {
-                    var tempArray = [...bookList];
-                    var index = tempArray.indexOf(e);
-                    tempArray[index].Completed = !e.Completed;
-                    tempArray[index].LastUpdated = Date.now();
-                    setBookList(tempArray);
-                }} />
-                <h3>Last updated: {date}</h3>
-            </li>
-        )})
+            date = date.toLocaleString('en-US');
+            let tempRender = (
+                <li key={bookList.indexOf(e)}>
+                    <h1>{e.Title}</h1>
+                    <h2>By {e.Author}</h2>
+                    <h3>Pages Read: {e.PagesRead}</h3>
+                    <label>Completed: </label>
+                    <input checked={e.Completed} type='checkbox' onChange={() => {
+                        UpdateCompleted(e);
+                    }} />
+                    <h3>Last updated: {date}</h3>
+                </li>
+            )
+            if(e.Completed === false) {
+                readingListArray.push(tempRender);
+            } else {
+                finishedListArray.push(tempRender);
+            }
+        });
+        return [readingListArray, finishedListArray];
+    }
     , [bookList]);
 
     return (
@@ -71,10 +87,20 @@ const BookTracker = () => {
                 }} />
                 <input type='submit' value='Submit' />
             </form>
-
-            <ol>
-                {bookListRender}
-            </ol>
+            <div className="row">
+                <div className="column">
+                    <label><h1>Reading List</h1></label>
+                    <ol>
+                        {toReadListRender}
+                    </ol>
+                </div>
+                <div className="column">
+                    <label><h1>Finished Books</h1></label>
+                    <ol>
+                        {finishedListRender}
+                    </ol>
+                </div>
+            </div>
         </div>
     )
 }

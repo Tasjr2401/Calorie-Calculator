@@ -1,7 +1,7 @@
 import React, {useEffect, useMemo, useState} from "react";
 import { handleNumber } from "./UsefulFunctions";
 
-const Home = () => {
+const CalorieTracker = () => {
     const [calorieGoal, setCalorieGoal] = useState(parseInt(localStorage.getItem('CalorieGoal')));
     const [currentCalories, setCurrentCalories] = useState(0);
     const [caloriesLeft, setCaloriesLeft] = useState(0);
@@ -154,4 +154,4 @@ const Home = () => {
     );
 }
 
-export default Home;
+export default CalorieTracker;
