@@ -2,7 +2,13 @@ import React, {useEffect, useMemo, useState} from "react";
 import { handleNumber } from "./UsefulFunctions";
 
 const CalorieTracker = () => {
-    const [calorieGoal, setCalorieGoal] = useState(parseInt(localStorage.getItem('CalorieGoal')));
+    const [calorieGoal, setCalorieGoal] = useState(() => {
+        var temp = parseInt(localStorage.getItem('CalorieGoal'));
+        if(temp) {
+            return temp; 
+        }
+        return 0;
+    });
     const [currentCalories, setCurrentCalories] = useState(0);
     const [calorieInput, setCalorieInput] = useState(0);
     const [foodName, setFoodName] = useState('');
@@ -13,7 +19,7 @@ const CalorieTracker = () => {
     }
     const [foodList, setFoodList] = useState(foodArray);
     const [tempCalorieInput, setTempCalorieInput] = useState(0);
-    const [resetCalorie, setResetCalorie] = useState();
+    // const [resetCalorie, setResetCalorie] = useState();
 
     function DeleteFood(food) {
         var index = foodList.indexOf(food);
@@ -90,8 +96,7 @@ const CalorieTracker = () => {
             return (
             <div>
                 <input type='number' value={tempCalorieInput} onChange={({target}) => {
-                    var inputValue = handleNumber(target.value);
-                    setTempCalorieInput(inputValue);
+                    setTempCalorieInput(handleNumber(target.value));
                 }} />
                 <input type='button' value='Submit' onClick={() => {
                     var input = handleNumber(tempCalorieInput);
@@ -111,7 +116,7 @@ const CalorieTracker = () => {
             localStorage.removeItem('CalorieGoal');
             }} >Change Calorie Goal</button>
         )
-    }, [calorieGoal]);
+    }, [calorieGoal, tempCalorieInput]);
 
     // useEffect(() => {
     //     if(Number.isNaN(parseInt(calorieGoal)) === false) {
@@ -128,7 +133,7 @@ const CalorieTracker = () => {
     //Calculate Calores left when two inputs change
     const caloriesLeft = useMemo(() => {
         if(Number.isNaN(calorieGoal-currentCalories))
-            return; 0
+            return 0;
         return (calorieGoal-currentCalories);
     }, [calorieGoal, currentCalories]);
 
