@@ -4,15 +4,14 @@ import { handleNumber } from "./UsefulFunctions";
 const CalorieTracker = () => {
     const [calorieGoal, setCalorieGoal] = useState(parseInt(localStorage.getItem('CalorieGoal')));
     const [currentCalories, setCurrentCalories] = useState(0);
-    const [caloriesLeft, setCaloriesLeft] = useState(0);
     const [calorieInput, setCalorieInput] = useState(0);
     const [foodName, setFoodName] = useState('');
+    const [mealName, setMealName] = useState('');
     var foodArray = JSON.parse(localStorage.getItem('FoodList'));
     if(!foodArray) {
         foodArray = [];
     }
     const [foodList, setFoodList] = useState(foodArray);
-    // const [foodListRender, setFoodListRender] = useState([]);
     const [tempCalorieInput, setTempCalorieInput] = useState(0);
     const [resetCalorie, setResetCalorie] = useState();
 
@@ -23,16 +22,7 @@ const CalorieTracker = () => {
         setFoodList(newFoodList);
     }
 
-    
-    // function handleNumber(num) {
-    //     var tempVar = parseInt(num);
-    //     if(Number.isNaN(tempVar)) {
-    //         return 0;
-    //     }
-    //     return tempVar;
-    // }
-
-    function AddCalories() {
+    function AddCalories(mealName) {
         if(Number.isNaN(calorieInput) || foodName.length === 0) {
             alert('Input is empty');
             return;
@@ -40,7 +30,8 @@ const CalorieTracker = () => {
 
         var newFood = {
             FoodName: foodName,
-            FoodCalories: calorieInput
+            FoodCalories: calorieInput,
+            MealName: mealName
         };
 
         setFoodList([...foodList, newFood]);
@@ -70,53 +61,76 @@ const CalorieTracker = () => {
     }, [foodList.length])
 
     //Set Calorie Goal Value on first render
-    const inputGoalRender = (
-        <div>
-            <input type='number' value={tempCalorieInput} onChange={({target}) => {
-                var inputValue = handleNumber(target.value);
-                setTempCalorieInput(inputValue);
-            }} />
-            <input type='button' value='Submit' onClick={() => {
-                localStorage.setItem('CalorieGoal', tempCalorieInput);
-                setCalorieGoal(tempCalorieInput);
-                setTempCalorieInput(0);
-                setResetCalorie(resetButton);
-            }} />
-        </div>
-    );
+    // const inputGoalRender = (
+    //     <div>
+    //         <input type='number' value={tempCalorieInput} onChange={({target}) => {
+    //             var inputValue = handleNumber(target.value);
+    //             setTempCalorieInput(inputValue);
+    //         }} />
+    //         <input type='button' value='Submit' onClick={() => {
+    //             localStorage.setItem('CalorieGoal', tempCalorieInput);
+    //             setCalorieGoal(tempCalorieInput);
+    //             setTempCalorieInput(0);
+    //             setResetCalorie(resetButton);
+    //         }} />
+    //     </div>
+    // );
     
-    const resetButton = (
-        <button onClick={() => {
+    // const resetButton = (
+    //     <button onClick={() => {
+    //         setCalorieGoal(null);
+    //         localStorage.removeItem('CalorieGoal');
+    //         setResetCalorie();
+    //     }} >Change Calorie Goal</button>
+    // );
+
+
+    const calorieGoalChangeDisplay = useMemo(() => {
+        if(!calorieGoal || calorieGoal === 0) {
+            return (
+            <div>
+                <input type='number' value={tempCalorieInput} onChange={({target}) => {
+                    var inputValue = handleNumber(target.value);
+                    setTempCalorieInput(inputValue);
+                }} />
+                <input type='button' value='Submit' onClick={() => {
+                    var input = handleNumber(tempCalorieInput);
+                    if(Number.isNaN(input)) {
+                        return;
+                    }
+                    localStorage.setItem('CalorieGoal', input);
+                    setCalorieGoal(input);
+                    setTempCalorieInput(0);
+                }} />
+            </div>)
+        }
+
+        return ( 
+            <button onClick={() => {
             setCalorieGoal(null);
             localStorage.removeItem('CalorieGoal');
-            setResetCalorie();
-        }} >Change Calorie Goal</button>
-    );
+            }} >Change Calorie Goal</button>
+        )
+    }, [calorieGoal]);
 
-    useEffect(() => {
-        if(Number.isNaN(parseInt(calorieGoal)) === false) {
-            setResetCalorie(resetButton);
-        }
-    },[calorieGoal]);
+    // useEffect(() => {
+    //     if(Number.isNaN(parseInt(calorieGoal)) === false) {
+    //         setResetCalorie(resetButton);
+    //     }
+    // },[calorieGoal]);
 
-    useEffect(() => {
-        if(calorieGoal === undefined || Number.isNaN(parseInt(calorieGoal))) {
-            setCalorieGoal(inputGoalRender);
-        }
-    }, [tempCalorieInput, resetCalorie]);
+    // useEffect(() => {
+    //     if(calorieGoal === undefined || Number.isNaN(parseInt(calorieGoal))) {
+    //         setCalorieGoal(inputGoalRender);
+    //     }
+    // }, [tempCalorieInput, resetCalorie]);
 
     //Calculate Calores left when two inputs change
-    useEffect(() => {
+    const caloriesLeft = useMemo(() => {
         if(Number.isNaN(calorieGoal-currentCalories))
-            return;
-        setCaloriesLeft(calorieGoal-currentCalories);
+            return; 0
+        return (calorieGoal-currentCalories);
     }, [calorieGoal, currentCalories]);
-
-    //render the food list under the food input hen foodList Changes
-
-    const foodListLength = useMemo(() => {
-        return (<h1>{foodList.length}</h1>);
-    }, [foodList.length]);
 
     const foodRender = useMemo(() => (
         foodList.map(e =>
@@ -132,7 +146,7 @@ const CalorieTracker = () => {
     return (
         <div>
             <h1>Hello Calories</h1>
-            {resetCalorie}
+            {calorieGoalChangeDisplay}
             <h1 id="calorie-display">{calorieGoal} - {currentCalories} = {caloriesLeft}</h1>
             <div>
                 <label>Name</label>
@@ -144,12 +158,15 @@ const CalorieTracker = () => {
                     setCalorieInput(inputValue);
                 }} />
                 <br />
+                <input type='text'value={mealName} placeholder='Meal Name' onChange={({target}) => {
+                    setMealName(target.value);
+                }} /> 
+                <br />
                 <input type='button' value='Add Food' onClick={AddCalories} />
             </div>
             <ol>
                 {foodRender}
             </ol>
-            {foodListLength}
         </div>
     );
 }
