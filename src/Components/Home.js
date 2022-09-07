@@ -1,5 +1,6 @@
 import React, {useEffect, useMemo, useState} from "react";
 import { handleNumber } from "./UsefulFunctions";
+import MealTime from "./MealTime";
 
 const CalorieTracker = () => {
     const [calorieGoal, setCalorieGoal] = useState(() => {
@@ -28,7 +29,7 @@ const CalorieTracker = () => {
         setFoodList(newFoodList);
     }
 
-    function AddCalories(mealName) {
+    function AddCalories() {
         if(Number.isNaN(calorieInput) || foodName.length === 0) {
             alert('Input is empty');
             return;
@@ -64,32 +65,7 @@ const CalorieTracker = () => {
         });
 
         setCurrentCalories(calorieSum);
-    }, [foodList.length])
-
-    //Set Calorie Goal Value on first render
-    // const inputGoalRender = (
-    //     <div>
-    //         <input type='number' value={tempCalorieInput} onChange={({target}) => {
-    //             var inputValue = handleNumber(target.value);
-    //             setTempCalorieInput(inputValue);
-    //         }} />
-    //         <input type='button' value='Submit' onClick={() => {
-    //             localStorage.setItem('CalorieGoal', tempCalorieInput);
-    //             setCalorieGoal(tempCalorieInput);
-    //             setTempCalorieInput(0);
-    //             setResetCalorie(resetButton);
-    //         }} />
-    //     </div>
-    // );
-    
-    // const resetButton = (
-    //     <button onClick={() => {
-    //         setCalorieGoal(null);
-    //         localStorage.removeItem('CalorieGoal');
-    //         setResetCalorie();
-    //     }} >Change Calorie Goal</button>
-    // );
-
+    }, [foodList.length]);
 
     const calorieGoalChangeDisplay = useMemo(() => {
         if(!calorieGoal || calorieGoal === 0) {
@@ -118,18 +94,6 @@ const CalorieTracker = () => {
         )
     }, [calorieGoal, tempCalorieInput]);
 
-    // useEffect(() => {
-    //     if(Number.isNaN(parseInt(calorieGoal)) === false) {
-    //         setResetCalorie(resetButton);
-    //     }
-    // },[calorieGoal]);
-
-    // useEffect(() => {
-    //     if(calorieGoal === undefined || Number.isNaN(parseInt(calorieGoal))) {
-    //         setCalorieGoal(inputGoalRender);
-    //     }
-    // }, [tempCalorieInput, resetCalorie]);
-
     //Calculate Calores left when two inputs change
     const caloriesLeft = useMemo(() => {
         if(Number.isNaN(calorieGoal-currentCalories))
@@ -137,16 +101,40 @@ const CalorieTracker = () => {
         return (calorieGoal-currentCalories);
     }, [calorieGoal, currentCalories]);
 
-    const foodRender = useMemo(() => (
-        foodList.map(e =>
-        <li key={e.FoodCalories + foodList.indexOf(e)}>
-            <h1>{e.FoodName}</h1>
-            <h2>{e.FoodCalories}</h2>
-            <button onClick={() => {
-                DeleteFood(e)
-            }} >Delete Food</button>
-        </li>
-        )), [foodList.length]);
+    const foodRender = useMemo(() => {
+        var [breakfastList, lunchList, dinnerList, snackList] = [[],[],[],[]];
+        foodList.forEach((food) => {
+            switch(food.MealName) {
+                case 'Breakfast':
+                    breakfastList.push(food);
+                    break;
+                case 'Lunch':
+                    lunchList.push(food);
+                    break;
+                case 'Dinner': 
+                    dinnerList.push(food);
+                    break;
+                case 'Snack':
+                    snackList.push(food);
+                    break;
+                default:
+                    alert(`${food.MealName} does not have a meal assigned to it.`);
+                    break;
+            }
+
+        });
+        return (
+            <>
+                <MealTime mealName='Breakfast' mealList={breakfastList} DeleteFoodCallBack={(food) => DeleteFood(food)} />
+                <br />
+                <MealTime mealName='Lunch' mealList={lunchList} DeleteFoodCallBack={(food) => DeleteFood(food)} />
+                <br />
+                <MealTime mealName='Dinner' mealList={dinnerList} DeleteFoodCallBack={(food) => DeleteFood(food)} />
+                <br />
+                <MealTime mealName='Snack' mealList={snackList} DeleteFoodCallBack={(food) => DeleteFood(food)} />
+            </>
+        )
+    }, [foodList]);
 
     return (
         <div>
@@ -163,15 +151,21 @@ const CalorieTracker = () => {
                     setCalorieInput(inputValue);
                 }} />
                 <br />
-                <input type='text'value={mealName} placeholder='Meal Name' onChange={({target}) => {
+                <label>Meal: </label>
+                <select selected='Breakfast' name="Meal" onChange={({target}) => {
                     setMealName(target.value);
-                }} /> 
+                }}>
+                    <option value='Breakfast'>Breakfast</option>    
+                    <option value='Lunch'>Lunch</option>
+                    <option value='Dinner'>Dinner</option>
+                    <option value='Snacks'>Snacks</option>
+                </select> 
                 <br />
                 <input type='button' value='Add Food' onClick={AddCalories} />
             </div>
-            <ol>
+            <div>
                 {foodRender}
-            </ol>
+            </div>
         </div>
     );
 }

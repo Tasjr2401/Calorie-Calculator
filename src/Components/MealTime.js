@@ -1,14 +1,16 @@
 import React, { useMemo } from "react";
 
-const MealTime = ({mealName, mealList, DeleteFood}) => {
+const MealTime = ({mealName, mealList, DeleteFoodCallBack}) => {
     const mealListRender = useMemo(() => {
-        mealList.map(food => 
+        if(!mealList || mealList.length === 0) {
+            return <h2>Nothing has been added for this meal</h2>
+        }
+        return mealList.map(food => 
             <li key={mealList.indexOf(food)}>
                 <h3>{food.FoodName}<p>{food.FoodCalories}</p></h3>
-                <button onClick={DeleteFood(food)}>Delete</button>
+                <button onClick={DeleteFoodCallBack(food)}>Delete</button>
             </li>
-        )
-    }, []);
+        )}, [mealList.length]);
 
     return (
         <div>
