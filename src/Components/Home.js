@@ -23,10 +23,7 @@ const CalorieTracker = () => {
     // const [resetCalorie, setResetCalorie] = useState();
 
     function DeleteFood(food) {
-        var index = foodList.indexOf(food);
-        var newFoodList = [...foodList];
-        newFoodList.splice(index, 1);
-        setFoodList(newFoodList);
+        setFoodList(prevList => prevList.filter(item => item !== food));
     }
 
     function AddCalories() {
@@ -46,6 +43,7 @@ const CalorieTracker = () => {
         //reseting input feilds
         setCalorieInput(0);
         setFoodName('');
+        setMealName('');
     }
 
     useEffect(() => {
@@ -118,29 +116,30 @@ const CalorieTracker = () => {
                     snackList.push(food);
                     break;
                 default:
-                    alert(`${food.MealName} does not have a meal assigned to it.`);
+                    console.log(`${food.FoodName} does not have a meal assigned to it.`);
                     break;
             }
 
         });
         return (
             <>
-                <MealTime mealName='Breakfast' mealList={breakfastList} DeleteFoodCallBack={(food) => DeleteFood(food)} />
+                <MealTime mealName='Breakfast' mealList={breakfastList} DeleteFoodCallBack={DeleteFood} AddToMealCallBack={(meal) => setMealName(meal)} />
                 <br />
-                <MealTime mealName='Lunch' mealList={lunchList} DeleteFoodCallBack={(food) => DeleteFood(food)} />
+                <MealTime mealName='Lunch' mealList={lunchList} DeleteFoodCallBack={DeleteFood} AddToMealCallBack={(meal) => setMealName(meal)} />
                 <br />
-                <MealTime mealName='Dinner' mealList={dinnerList} DeleteFoodCallBack={(food) => DeleteFood(food)} />
+                <MealTime mealName='Dinner' mealList={dinnerList} DeleteFoodCallBack={DeleteFood} AddToMealCallBack={(meal) => setMealName(meal)} />
                 <br />
-                <MealTime mealName='Snack' mealList={snackList} DeleteFoodCallBack={(food) => DeleteFood(food)} />
+                <MealTime mealName='Snack' mealList={snackList} DeleteFoodCallBack={DeleteFood} AddToMealCallBack={(meal) => setMealName(meal)} />
             </>
         )
     }, [foodList]);
 
-    return (
-        <div>
-            <h1>Hello Calories</h1>
-            {calorieGoalChangeDisplay}
-            <h1 id="calorie-display">{calorieGoal} - {currentCalories} = {caloriesLeft}</h1>
+    const FoodInput = useMemo(() => {
+        if(mealName === '' || mealName === null || mealName === undefined) {
+            return <></>;
+        }
+
+        return (
             <div>
                 <label>Name</label>
                 <input type='text' value={foodName} placeholder="Food Name" onChange={handleFoodNameChange} />
@@ -151,8 +150,30 @@ const CalorieTracker = () => {
                     setCalorieInput(inputValue);
                 }} />
                 <br />
+                <input type='button' value='Add Food' onClick={AddCalories} />
+            </div>
+        );
+    }, [mealName, foodName, calorieInput]);
+
+    return (
+        <div>
+            <h1>Hello Calories</h1>
+            {calorieGoalChangeDisplay}
+            <h1 id="calorie-display">{calorieGoal} - {currentCalories} = {caloriesLeft}</h1>
+            <div>
+                {FoodInput}
+                {/* <label>Name</label>
+                <input type='text' value={foodName} placeholder="Food Name" onChange={handleFoodNameChange} />
+                <br />
+                <label>Calories</label>
+                <input type='number' value={calorieInput} onChange={({target}) => {
+                    var inputValue = handleNumber(target.value);
+                    setCalorieInput(inputValue);
+                }} />
+                <br />
                 <label>Meal: </label>
                 <select selected='Breakfast' name="Meal" onChange={({target}) => {
+                    //var value = target.options[target.selectedIndex].value;
                     setMealName(target.value);
                 }}>
                     <option value='Breakfast'>Breakfast</option>    
@@ -161,7 +182,7 @@ const CalorieTracker = () => {
                     <option value='Snacks'>Snacks</option>
                 </select> 
                 <br />
-                <input type='button' value='Add Food' onClick={AddCalories} />
+                <input type='button' value='Add Food' onClick={AddCalories} /> */}
             </div>
             <div>
                 {foodRender}

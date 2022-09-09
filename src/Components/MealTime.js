@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 
-const MealTime = ({mealName, mealList, DeleteFoodCallBack}) => {
+const MealTime = ({mealName, mealList, DeleteFoodCallBack, AddToMealCallBack}) => {
     const mealListRender = useMemo(() => {
         if(!mealList || mealList.length === 0) {
             return <h2>Nothing has been added for this meal</h2>
@@ -8,7 +8,7 @@ const MealTime = ({mealName, mealList, DeleteFoodCallBack}) => {
         return mealList.map(food => 
             <li key={mealList.indexOf(food)}>
                 <h3>{food.FoodName}<p>{food.FoodCalories}</p></h3>
-                <button onClick={DeleteFoodCallBack(food)}>Delete</button>
+                <button onClick={() => DeleteFoodCallBack(food)}>Delete</button>
             </li>
         )}, [mealList.length]);
 
@@ -18,6 +18,7 @@ const MealTime = ({mealName, mealList, DeleteFoodCallBack}) => {
             <ol>
                 {mealListRender}
             </ol>
+            <input value='Add Meal' type='button' onClick={() => AddToMealCallBack(mealName)}/>
         </div>
     )
 };
