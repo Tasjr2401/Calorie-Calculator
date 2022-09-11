@@ -2,37 +2,34 @@ import React, {useEffect, useMemo, useState} from "react";
 import { handleNumber } from "./UsefulFunctions";
 import MealTime from "./MealTime";
 
+export type foodObj = {
+    FoodName: string,
+    FoodCalories: number,
+    MealName: string
+};
+
 const CalorieTracker = () => {
-    const [calorieGoal, setCalorieGoal] = useState(() => {
-        var temp = parseInt(localStorage.getItem('CalorieGoal'));
-        if(temp) {
-            return temp; 
-        }
-        return 0;
-    });
+    const [calorieGoal, setCalorieGoal] = useState(() => parseInt(localStorage.getItem('CalorieGoal') || '0'));
     const [currentCalories, setCurrentCalories] = useState(0);
     const [calorieInput, setCalorieInput] = useState(0);
     const [foodName, setFoodName] = useState('');
     const [mealName, setMealName] = useState('');
-    var foodArray = JSON.parse(localStorage.getItem('FoodList'));
-    if(!foodArray) {
-        foodArray = [];
-    }
+    var foodArray: foodObj[] = JSON.parse(localStorage.getItem('FoodList') || '[]');
     const [foodList, setFoodList] = useState(foodArray);
     const [tempCalorieInput, setTempCalorieInput] = useState(0);
     // const [resetCalorie, setResetCalorie] = useState();
 
-    function DeleteFood(food) {
+    function DeleteFood(food): void {
         setFoodList(prevList => prevList.filter(item => item !== food));
     }
 
-    function AddCalories() {
-        if(Number.isNaN(calorieInput) || foodName.length === 0) {
+    function AddCalories(): void {
+        if(foodName.length === 0) {
             alert('Input is empty');
             return;
         }
 
-        var newFood = {
+        var newFood: foodObj = {
             FoodName: foodName,
             FoodCalories: calorieInput,
             MealName: mealName
@@ -50,15 +47,15 @@ const CalorieTracker = () => {
         localStorage.setItem('FoodList', JSON.stringify(foodList));
     }, [foodList.length]);
     
-    function handleFoodNameChange({target}) {
+    function handleFoodNameChange({target}): void {
         setFoodName(target.value);
     }
 
     //Update Calorie Sum when food list is updated
     useEffect(() => {
-        var calorieSum = 0;
+        var calorieSum: number = 0;
         
-        foodList.forEach((food) => {
+        foodList.forEach((food: foodObj) => {
             calorieSum += food.FoodCalories;
         });
 
@@ -66,18 +63,18 @@ const CalorieTracker = () => {
     }, [foodList.length]);
 
     const calorieGoalChangeDisplay = useMemo(() => {
-        if(!calorieGoal || calorieGoal === 0) {
+        if(calorieGoal <= 0) {
             return (
             <div>
                 <input type='number' value={tempCalorieInput} onChange={({target}) => {
                     setTempCalorieInput(handleNumber(target.value));
                 }} />
                 <input type='button' value='Submit' onClick={() => {
-                    var input = handleNumber(tempCalorieInput);
-                    if(Number.isNaN(input)) {
+                    var input: number = handleNumber(tempCalorieInput);
+                    if(!input) {
                         return;
                     }
-                    localStorage.setItem('CalorieGoal', input);
+                    localStorage.setItem('CalorieGoal', JSON.stringify(input));
                     setCalorieGoal(input);
                     setTempCalorieInput(0);
                 }} />
@@ -86,7 +83,7 @@ const CalorieTracker = () => {
 
         return ( 
             <button onClick={() => {
-            setCalorieGoal(null);
+            setCalorieGoal(0);
             localStorage.removeItem('CalorieGoal');
             }} >Change Calorie Goal</button>
         )
@@ -100,8 +97,8 @@ const CalorieTracker = () => {
     }, [calorieGoal, currentCalories]);
 
     const foodRender = useMemo(() => {
-        var [breakfastList, lunchList, dinnerList, snackList] = [[],[],[],[]];
-        foodList.forEach((food) => {
+        var [breakfastList, lunchList, dinnerList, snackList]: foodObj[][] = [[],[],[],[]];
+        foodList.forEach((food: foodObj) => {
             switch(food.MealName) {
                 case 'Breakfast':
                     breakfastList.push(food);
@@ -135,7 +132,7 @@ const CalorieTracker = () => {
     }, [foodList]);
 
     const FoodInput = useMemo(() => {
-        if(mealName === '' || mealName === null || mealName === undefined) {
+        if(!mealName) {
             return <></>;
         }
 
@@ -146,7 +143,7 @@ const CalorieTracker = () => {
                 <br />
                 <label>Calories</label>
                 <input type='number' value={calorieInput} onChange={({target}) => {
-                    var inputValue = handleNumber(target.value);
+                    var inputValue: number = handleNumber(target.value);
                     setCalorieInput(inputValue);
                 }} />
                 <br />
@@ -162,27 +159,6 @@ const CalorieTracker = () => {
             <h1 id="calorie-display">{calorieGoal} - {currentCalories} = {caloriesLeft}</h1>
             <div>
                 {FoodInput}
-                {/* <label>Name</label>
-                <input type='text' value={foodName} placeholder="Food Name" onChange={handleFoodNameChange} />
-                <br />
-                <label>Calories</label>
-                <input type='number' value={calorieInput} onChange={({target}) => {
-                    var inputValue = handleNumber(target.value);
-                    setCalorieInput(inputValue);
-                }} />
-                <br />
-                <label>Meal: </label>
-                <select selected='Breakfast' name="Meal" onChange={({target}) => {
-                    //var value = target.options[target.selectedIndex].value;
-                    setMealName(target.value);
-                }}>
-                    <option value='Breakfast'>Breakfast</option>    
-                    <option value='Lunch'>Lunch</option>
-                    <option value='Dinner'>Dinner</option>
-                    <option value='Snacks'>Snacks</option>
-                </select> 
-                <br />
-                <input type='button' value='Add Food' onClick={AddCalories} /> */}
             </div>
             <div>
                 {foodRender}

@@ -1,35 +1,37 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, SetStateAction } from "react";
 import { handleNumber } from "./UsefulFunctions";
 import '../Style.css';
+import { JsxElement } from "typescript";
+
+type book = {
+    Title: string,
+    Author: string,
+    PagesRead: number,
+    Completed: boolean,
+    LastUpdated: number
+}
 
 const BookTracker = () => {
     const [bookTitle, setBookTitle] = useState('');
     const [bookAuthor, setBookAuthor] = useState('');
     const [pagesRead, setPagesRead] = useState(0);
-    const [completed, setCompleted] = useState(false);
 
-    const [bookList, setBookList] = useState(() => {
-        var tempArray = JSON.parse(localStorage.getItem('BookList'));
-        if(!tempArray) {
-            tempArray = [];
-        }
-        return tempArray;
-    })
+    const [bookList, setBookList]: [book[], React.Dispatch<SetStateAction<book[]>>] = useState(() => JSON.parse(localStorage.getItem('BookList') || '[]'));
 
-    function AddBook() {
-        var tempArray = [{
+    function AddBook(): void {
+        var tempArray: book[] = [{
             Title: bookTitle,
             Author: bookAuthor,
             PagesRead: pagesRead,
             Completed: false,
-            LastUpdated: new Date()
+            LastUpdated: Date.now()
         }, ...bookList];
 
         setBookList(tempArray);
     }
 
-    function UpdateCompleted(e) {
-        var tempArray = [...bookList];
+    function UpdateCompleted(e): void {
+        var tempArray: book[] = [...bookList];
         var index = tempArray.indexOf(e);
         tempArray[index].Completed = !e.Completed;
         tempArray[index].LastUpdated = Date.now();
@@ -45,10 +47,10 @@ const BookTracker = () => {
     }, [bookList]);
 
     const [toReadListRender, finishedListRender] = useMemo(() => {
-        var readingListArray = [];
-        var finishedListArray = [];
+        var readingListArray: JSX.Element[] = [];
+        var finishedListArray: JSX.Element[] = [];
         bookList.map(e => {
-            var date = new Date(e.LastUpdated);
+            var date: string | Date = new Date(e.LastUpdated);
             date = date.toLocaleString('en-US');
             let tempRender = (
                 <li key={bookList.indexOf(e)}>

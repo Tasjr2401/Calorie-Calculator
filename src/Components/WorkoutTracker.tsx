@@ -1,32 +1,22 @@
-import React, {useEffect, useMemo, useState} from "react";
+import React, {SetStateAction, useEffect, useMemo, useState} from "react";
 import { handleNumber } from "./UsefulFunctions";
 
+type workout = {
+    Name: string,
+    Weight: number,
+    Sets: number,
+    Reps: number
+}
+
 const WorkoutTracker = () => {
-    const [workOutList, setWorkOutList] = useState(() => {
-        var tempArray = JSON.parse(localStorage.getItem('WorkOutList'));
-        if(!tempArray) {
-            tempArray = [];
-        }
-        return tempArray;
-    });
+    const [workOutList, setWorkOutList]: [workout[], React.Dispatch<SetStateAction<workout[]>>] = useState(() => JSON.parse(localStorage.getItem('WorkOutList') || '[]'));
     const [workOutName, setWorkOutName] = useState('');
     const [weight, setWeight] = useState(0);
     const [reps, setReps] = useState(0);
     const [sets, setSets] = useState(0);
 
-    // function handleNumber(num) {
-    //     var tempVar = parseInt(num);
-    //     if(Number.isNaN(tempVar)) {
-    //         return 0;
-    //     }
-    //     return tempVar;
-    // }
-
     function DeleteWorkOut(workOut) {
-        var index = workOutList.indexOf(workOut);
-        var temparray = [...workOutList];
-        temparray.splice(index, 1);
-        setWorkOutList(temparray);
+        setWorkOutList(prevList => prevList.filter(x => x !== workOut));
     }
 
     function AddWorkout() {
@@ -62,8 +52,8 @@ const WorkoutTracker = () => {
         )
     }, [workOutList.length]);
 
-    const totalVolume = useMemo(() => {
-        var volume = 0;
+    const totalVolume: number = useMemo(() => {
+        var volume: number = 0;
         workOutList.forEach(e => {
             volume += (e.Sets * e.Reps) * e.Weight;
         });
@@ -89,19 +79,19 @@ const WorkoutTracker = () => {
                 <br />
                 <label>Weight in Ibs: </label>
                 <input value={weight} type='number' onChange={({target}) => {
-                    var num = handleNumber(target.value);
+                    var num: number = handleNumber(target.value);
                     setWeight(num);
                 }} />
                 <br />
                 <label>Reps</label>
                 <input value={reps} type='number' onChange={({target}) => {
-                    var num = handleNumber(target.value);
+                    var num: number = handleNumber(target.value);
                     setReps(num);
                 }} />
                 <br />
                 <label>Sets</label>
                 <input value={sets} type='number' onChange={({target}) => {
-                    var num = handleNumber(target.value);
+                    var num: number = handleNumber(target.value);
                     setSets(num);
                 }} />
                 <input type='submit' value='Submit' />
