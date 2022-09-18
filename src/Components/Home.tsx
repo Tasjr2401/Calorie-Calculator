@@ -1,6 +1,6 @@
 import React, {useEffect, useMemo, useState} from "react";
-import { handleNumber } from "./UsefulFunctions";
-import MealTime from "./MealTime";
+import {handleNumber} from './UsefulFunctions';
+import MealTime from './MealTime';
 
 export type foodObj = {
     FoodName: string,
@@ -8,9 +8,41 @@ export type foodObj = {
     MealName: string
 };
 
+interface Fruit {
+    type: 'Fruit';
+    name: string;
+    calories: number;
+}
+
+type Meat = {
+    type: 'Meat';
+    name: string;
+    calories: number;
+    protein: number;
+    eat(): void;
+}
+
+type Food = Fruit | Meat;
+
+const f: Food = {
+    type: 'Meat',
+    name: 'Steak',
+    calories: 300,
+    protein: 9,
+    eat() { console.log('eating'); },
+};
+
+function eat(f: Food) {
+    if (f.type == 'Meat') {
+        console.log('you ate ' + f.protein + ' grams of protein');
+    } else {
+        console.log('better get your protein elsewhere');
+    }
+}
+
 const CalorieTracker = () => {
     const [calorieGoal, setCalorieGoal] = useState(() => parseInt(localStorage.getItem('CalorieGoal') || '0'));
-    const [currentCalories, setCurrentCalories] = useState(0);
+    // const [currentCalories, setCurrentCalories] = useState(0);
     const [calorieInput, setCalorieInput] = useState(0);
     const [foodName, setFoodName] = useState('');
     const [mealName, setMealName] = useState('');
@@ -19,7 +51,7 @@ const CalorieTracker = () => {
     const [tempCalorieInput, setTempCalorieInput] = useState(0);
     // const [resetCalorie, setResetCalorie] = useState();
 
-    function DeleteFood(food): void {
+    function DeleteFood(food: foodObj): void {
         setFoodList(prevList => prevList.filter(item => item !== food));
     }
 
@@ -46,21 +78,19 @@ const CalorieTracker = () => {
     useEffect(() => {
         localStorage.setItem('FoodList', JSON.stringify(foodList));
     }, [foodList.length]);
-    
-    function handleFoodNameChange({target}): void {
-        setFoodName(target.value);
-    }
 
     //Update Calorie Sum when food list is updated
-    useEffect(() => {
-        var calorieSum: number = 0;
+    // useEffect(() => {
+    //     var calorieSum: number = 0;
         
-        foodList.forEach((food: foodObj) => {
-            calorieSum += food.FoodCalories;
-        });
+    //     foodList.forEach((food: foodObj) => {
+    //         calorieSum += food.FoodCalories;
+    //     });
 
-        setCurrentCalories(calorieSum);
-    }, [foodList.length]);
+    //     setCurrentCalories(calorieSum);
+    // }, [foodList.length]);
+
+    const currentCalories = foodList.reduce((sum, food) => sum + food.FoodCalories, 0);
 
     const calorieGoalChangeDisplay = useMemo(() => {
         if(calorieGoal <= 0) {
@@ -89,13 +119,6 @@ const CalorieTracker = () => {
         )
     }, [calorieGoal, tempCalorieInput]);
 
-    //Calculate Calores left when two inputs change
-    const caloriesLeft = useMemo(() => {
-        if(Number.isNaN(calorieGoal-currentCalories))
-            return 0;
-        return (calorieGoal-currentCalories);
-    }, [calorieGoal, currentCalories]);
-
     const foodRender = useMemo(() => {
         var [breakfastList, lunchList, dinnerList, snackList]: foodObj[][] = [[],[],[],[]];
         foodList.forEach((food: foodObj) => {
@@ -120,49 +143,59 @@ const CalorieTracker = () => {
         });
         return (
             <>
-                <MealTime mealName='Breakfast' mealList={breakfastList} DeleteFoodCallBack={DeleteFood} AddToMealCallBack={(meal) => setMealName(meal)} />
+                <MealTime MealName='Breakfast' MealList={breakfastList} DeleteFoodCallBack={DeleteFood} AddToMealCallBack={(meal) => setMealName(meal)} />
                 <br />
-                <MealTime mealName='Lunch' mealList={lunchList} DeleteFoodCallBack={DeleteFood} AddToMealCallBack={(meal) => setMealName(meal)} />
+                <MealTime MealName='Lunch' MealList={lunchList} DeleteFoodCallBack={DeleteFood} AddToMealCallBack={(meal) => setMealName(meal)} />
                 <br />
-                <MealTime mealName='Dinner' mealList={dinnerList} DeleteFoodCallBack={DeleteFood} AddToMealCallBack={(meal) => setMealName(meal)} />
+                <MealTime MealName='Dinner' MealList={dinnerList} DeleteFoodCallBack={DeleteFood} AddToMealCallBack={(meal) => setMealName(meal)} />
                 <br />
-                <MealTime mealName='Snack' mealList={snackList} DeleteFoodCallBack={DeleteFood} AddToMealCallBack={(meal) => setMealName(meal)} />
+                <MealTime MealName='Snack' MealList={snackList} DeleteFoodCallBack={DeleteFood} AddToMealCallBack={(meal) => setMealName(meal)} />
             </>
         )
     }, [foodList]);
-
-    const FoodInput = useMemo(() => {
-        if(!mealName) {
-            return <></>;
-        }
-
-        return (
-            <div>
-                <label>Name</label>
-                <input type='text' value={foodName} placeholder="Food Name" onChange={handleFoodNameChange} />
-                <br />
-                <label>Calories</label>
-                <input type='number' value={calorieInput} onChange={({target}) => {
-                    var inputValue: number = handleNumber(target.value);
-                    setCalorieInput(inputValue);
-                }} />
-                <br />
-                <input type='button' value='Add Food' onClick={AddCalories} />
-            </div>
-        );
-    }, [mealName, foodName, calorieInput]);
 
     return (
         <div>
             <h1>Hello Calories</h1>
             {calorieGoalChangeDisplay}
-            <h1 id="calorie-display">{calorieGoal} - {currentCalories} = {caloriesLeft}</h1>
+            <h1 id="calorie-display">{calorieGoal} - {currentCalories} = {calorieGoal-currentCalories}</h1>
             <div>
-                {FoodInput}
+                <FoodInput MealName={mealName} FoodName={foodName} HandleFoodNameChange={(e: string) => {setFoodName(e)}} CalorieInput={calorieInput} SetCalorieInputState={(e: number) => setCalorieInput(e)} AddCaloriesCallBack={AddCalories} />
+                
             </div>
             <div>
                 {foodRender}
             </div>
+        </div>
+    );
+}
+
+interface FoodInputPropTypes {
+    MealName: string;
+    FoodName: string;
+    HandleFoodNameChange: (arg0: string) => void;
+    CalorieInput: number;
+    SetCalorieInputState: (arg0: number) => void;
+    AddCaloriesCallBack: () => void;
+}
+
+const FoodInput = ({MealName, FoodName, HandleFoodNameChange, CalorieInput, SetCalorieInputState, AddCaloriesCallBack}: FoodInputPropTypes) => {
+    if(!MealName) {
+        return <></>;
+    }
+
+    return (
+        <div>
+            <label>Name</label>
+            <input type='text' value={FoodName} placeholder="Food Name" onChange={({target}) => HandleFoodNameChange(target.value)} />
+            <br />
+            <label>Calories</label>
+            <input type='number' value={CalorieInput} onChange={({target}) => {
+                var inputValue: number = handleNumber(target.value);
+                SetCalorieInputState(inputValue);
+            }} />
+            <br />
+            <input type='button' value='Add Food' onClick={AddCaloriesCallBack} />
         </div>
     );
 }

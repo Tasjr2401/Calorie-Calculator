@@ -15,7 +15,7 @@ const WorkoutTracker = () => {
     const [reps, setReps] = useState(0);
     const [sets, setSets] = useState(0);
 
-    function DeleteWorkOut(workOut) {
+    function DeleteWorkOut(workOut: workout) {
         setWorkOutList(prevList => prevList.filter(x => x !== workOut));
     }
 

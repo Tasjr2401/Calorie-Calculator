@@ -1,25 +1,32 @@
 import React, { useMemo } from "react";
 import { foodObj } from "./Home";
 
-const MealTime = ({mealName, mealList, DeleteFoodCallBack, AddToMealCallBack}) => {
+interface MealTimePropTypes {
+    MealName: string;
+    MealList: foodObj[];
+    DeleteFoodCallBack: (arg0: foodObj) => void;
+    AddToMealCallBack: (arg0: string) => void;
+}
+
+const MealTime = ({MealName, MealList, DeleteFoodCallBack, AddToMealCallBack}: MealTimePropTypes) => {
     const mealListRender = useMemo(() => {
-        if(!mealList || mealList.length === 0) {
+        if(!MealList || MealList.length === 0) {
             return <h2>Nothing has been added for this meal</h2>
         }
-        return mealList.map(food => 
-            <li key={mealList.indexOf(food)}>
+        return MealList.map(food => 
+            <li key={MealList.indexOf(food)}>
                 <h3>{food.FoodName}<p>{food.FoodCalories}</p></h3>
                 <button onClick={() => DeleteFoodCallBack(food)}>Delete</button>
             </li>
-        )}, [mealList.length]);
+        )}, [MealList.length]);
 
     return (
         <div>
-            <h2>{mealName}</h2>
+            <h2>{MealName}</h2>
             <ol>
                 {mealListRender}
             </ol>
-            <input value='Add Meal' type='button' onClick={() => AddToMealCallBack(mealName)}/>
+            <input value='Add Meal' type='button' onClick={() => AddToMealCallBack(MealName)}/>
         </div>
     )
 };

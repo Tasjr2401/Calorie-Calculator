@@ -1,10 +1,8 @@
-import { type } from "os";
-
-export function handleNumber(num: string | number): number {
+export function handleNumber(num) {
     if(typeof num === 'number') {
         return num;
     }
-    var tempVar: number = parseInt(num);
+    var tempVar = parseInt(num);
     if(Number.isNaN(tempVar)) {
         return 0;
     }

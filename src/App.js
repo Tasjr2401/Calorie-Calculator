@@ -1,10 +1,10 @@
 import logo from './logo.svg';
 import './App.css';
 import {BrowserRouter, Routes, Route} from 'react-router-dom';
-import CalorieTracker from './Components/Home';
-import WorkoutTracker from './Components/WorkoutTracker';
-import BookTracker from './Components/BookTracker';
-import Navigation from './Components/Navigation';
+import CalorieTracker from './Components/Home.tsx';
+import Navigation from './Components/Navigation.tsx';
+import WorkoutTracker from './Components/WorkoutTracker.tsx';
+import BookTracker from './Components/BookTracker.tsx';
 
 function App() {
   return (

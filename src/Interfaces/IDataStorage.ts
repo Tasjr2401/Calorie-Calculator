@@ -1,4 +1,4 @@
-interface IDataStorage {
+export interface IDataStorage {
     getData(key: string): string;
     postData(key: string, dataAsString: string): void;
 }

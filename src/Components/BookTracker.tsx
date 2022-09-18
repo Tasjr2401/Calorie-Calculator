@@ -30,7 +30,7 @@ const BookTracker = () => {
         setBookList(tempArray);
     }
 
-    function UpdateCompleted(e): void {
+    function UpdateCompleted(e: book): void {
         var tempArray: book[] = [...bookList];
         var index = tempArray.indexOf(e);
         tempArray[index].Completed = !e.Completed;
