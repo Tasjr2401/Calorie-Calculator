@@ -51,7 +51,7 @@ const FoodTrackerSlice = createSlice({
                 currentMealName: action.payload
             }
         },
-        finishedEnteringMeal: (state = initialState, action): FoodTrackerState => {
+        finishedEnteringMeal: (state = initialState): FoodTrackerState => {
             return {
                 ...state,
                 isEnteringMeal: false,

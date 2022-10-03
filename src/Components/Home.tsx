@@ -54,66 +54,11 @@ const CalorieTracker = () => {
         dispatch(foodActions.changeCalorieGoal(localCalorieGoal));
     },[]);
 
-    // function AddCalories(form: React.FormEvent<HTMLFormElement>): void {
-    //     const foodName: string = (form.currentTarget.elements.namedItem('FoodName') as HTMLInputElement).value;
-    //     const calorieInput: number = handleNumber((form.currentTarget.elements.namedItem('CalorieInput') as HTMLInputElement).value)
-
-    //     if(foodName.length === 0) {
-    //         alert('Input is empty');
-    //         return;
-    //     }
-
-    //     var newFood: foodObj = {
-    //         FoodName: foodName,
-    //         FoodCalories: calorieInput,
-    //         MealName: currentMealName
-    //     };
-
-    //     //setFoodList([...foodList, newFood]);
-    //     dispatch(foodActions.addFood(newFood));
-    //     dispatch(foodActions.finishedEnteringMeal);
-    // }
-
     useEffect(() => {
         localStorage.setItem('FoodList', JSON.stringify(foodList));
     }, [foodList]);
 
     const currentCalories: number = foodList.reduce((sum, food) => sum + food.FoodCalories, 0);
-
-    // const foodRender = useMemo(() => {
-    //     var [breakfastList, lunchList, dinnerList, snackList]: foodObj[][] = [[],[],[],[]];
-    //     foodList.forEach((food: foodObj) => {
-    //         switch(food.MealName) {
-    //             case 'Breakfast':
-    //                 breakfastList.push(food);
-    //                 break;
-    //             case 'Lunch':
-    //                 lunchList.push(food);
-    //                 break;
-    //             case 'Dinner': 
-    //                 dinnerList.push(food);
-    //                 break;
-    //             case 'Snack':
-    //                 snackList.push(food);
-    //                 break;
-    //             default:
-    //                 console.log(`${food.FoodName} does not have a meal assigned to it.`);
-    //                 break;
-    //         }
-
-    //     });
-    //     return (
-    //         <>
-    //             <MealTime MealName='Breakfast' MealList={breakfastList} />
-    //             <br />
-    //             <MealTime MealName='Lunch' MealList={lunchList} />
-    //             <br />
-    //             <MealTime MealName='Dinner' MealList={dinnerList} />
-    //             <br />
-    //             <MealTime MealName='Snack' MealList={snackList} />
-    //         </>
-    //     )
-    // }, [foodList]);
 
     return (
         <div>
@@ -170,14 +115,6 @@ const CalorieGoalChangeDisplay = () => {
         )
     }
     
-interface FoodInputPropTypes {
-    MealName: string;
-    FoodName: string;
-    HandleFoodNameChange: (arg0: string) => void;
-    CalorieInput: number;
-    SetCalorieInputState: (arg0: number) => void;
-    AddCaloriesCallBack: () => void;
-}
 const FoodInput = () => {
     const { currentMealName } = useSelector((state: RootType) => state.foodTracker);
     const dispatch = useDispatch();
@@ -201,7 +138,7 @@ const FoodInput = () => {
 
         //setFoodList([...foodList, newFood]);
         dispatch(foodActions.addFood(newFood));
-        dispatch(foodActions.finishedEnteringMeal);
+        dispatch(foodActions.finishedEnteringMeal());
     }
 
     if(!currentMealName || currentMealName.length === 0) {

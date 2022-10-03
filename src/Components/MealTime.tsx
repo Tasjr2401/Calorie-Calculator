@@ -12,9 +12,9 @@ const MealTime = ({mealName}: MealTimePropTypes) => {
     const { foodList } = useSelector((state: RootType) => state.foodTracker);
     const dispatch = useDispatch();
     
-    const mealList = foodList.filter(x => x.MealName === mealName)
-
+    
     const mealListRender = useMemo(() => {
+        const mealList = foodList.filter(x => x.MealName === mealName)
         if(!mealList || mealList.length === 0) {
             return <h2>Nothing has been added for this meal</h2>
         }
@@ -23,7 +23,7 @@ const MealTime = ({mealName}: MealTimePropTypes) => {
                 <h3>{food.FoodName}<p>{food.FoodCalories}</p></h3>
                 <button onClick={() => dispatch(foodActions.removeFood(food))}>Delete</button>
             </li>
-        )}, [mealList.length]);
+        )}, [foodList]);
 
     return (
         <div>
