@@ -1,34 +1,37 @@
 import React, { useMemo } from "react";
 import { foodObj } from "./Home";
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { foodActions } from "./ReduxFiles/FoodSlice";
+import { RootType } from "./ReduxFiles/Store";
 
 interface MealTimePropTypes {
-    MealName: string;
-    MealList: foodObj[];
+    mealName: string;
 }
 
-const MealTime = ({MealName, MealList}: MealTimePropTypes) => {
+const MealTime = ({mealName}: MealTimePropTypes) => {
+    const { foodList } = useSelector((state: RootType) => state.foodTracker);
     const dispatch = useDispatch();
     
+    const mealList = foodList.filter(x => x.MealName === mealName)
+
     const mealListRender = useMemo(() => {
-        if(!MealList || MealList.length === 0) {
+        if(!mealList || mealList.length === 0) {
             return <h2>Nothing has been added for this meal</h2>
         }
-        return MealList.map(food => 
-            <li key={MealList.indexOf(food)}>
+        return mealList.map(food => 
+            <li key={mealList.indexOf(food)}>
                 <h3>{food.FoodName}<p>{food.FoodCalories}</p></h3>
                 <button onClick={() => dispatch(foodActions.removeFood(food))}>Delete</button>
             </li>
-        )}, [MealList.length]);
+        )}, [mealList.length]);
 
     return (
         <div>
-            <h2>{MealName}</h2>
+            <h2>{mealName}</h2>
             <ol>
                 {mealListRender}
             </ol>
-            <input value='Add Meal' type='button' onClick={() => dispatch(foodActions.enteringMeal(MealName))}/>
+            <input value='Add Meal' type='button' onClick={() => dispatch(foodActions.enteringMeal(mealName))}/>
         </div>
     )
 };

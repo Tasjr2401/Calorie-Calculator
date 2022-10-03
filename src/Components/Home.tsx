@@ -1,6 +1,9 @@
 import React, {useEffect, useMemo, useState} from "react";
 import {handleNumber} from './UsefulFunctions';
 import MealTime from './MealTime';
+import { useSelector, useDispatch } from "react-redux";
+import { foodActions } from "./ReduxFiles/FoodSlice";
+import { RootType } from "./ReduxFiles/Store";
 
 export type foodObj = {
     FoodName: string,
@@ -41,135 +44,132 @@ function eat(f: Food) {
 }
 
 const CalorieTracker = () => {
-    const [calorieGoal, setCalorieGoal] = useState(() => parseInt(localStorage.getItem('CalorieGoal') || '0'));
-    // const [currentCalories, setCurrentCalories] = useState(0);
-    const [calorieInput, setCalorieInput] = useState(0);
-    const [foodName, setFoodName] = useState('');
-    const [mealName, setMealName] = useState('');
-    var foodArray: foodObj[] = JSON.parse(localStorage.getItem('FoodList') || '[]');
-    const [foodList, setFoodList] = useState(foodArray);
-    const [tempCalorieInput, setTempCalorieInput] = useState(0);
-    // const [resetCalorie, setResetCalorie] = useState();
+    const { calorieGoal, foodList } = useSelector((state: RootType) => state.foodTracker);
+    const dispatch = useDispatch();
 
-    function DeleteFood(food: foodObj): void {
-        setFoodList(prevList => prevList.filter(item => item !== food));
-    }
+    useEffect(() => {
+        var foodArray: foodObj[] = JSON.parse(localStorage.getItem('FoodList') || '[]');
+        var localCalorieGoal: number = JSON.parse(localStorage.getItem('CalorieGoal') || '0');
+        dispatch(foodActions.loadFood(foodArray));
+        dispatch(foodActions.changeCalorieGoal(localCalorieGoal));
+    },[]);
 
-    function AddCalories(): void {
-        if(foodName.length === 0) {
-            alert('Input is empty');
-            return;
-        }
+    // function AddCalories(form: React.FormEvent<HTMLFormElement>): void {
+    //     const foodName: string = (form.currentTarget.elements.namedItem('FoodName') as HTMLInputElement).value;
+    //     const calorieInput: number = handleNumber((form.currentTarget.elements.namedItem('CalorieInput') as HTMLInputElement).value)
 
-        var newFood: foodObj = {
-            FoodName: foodName,
-            FoodCalories: calorieInput,
-            MealName: mealName
-        };
+    //     if(foodName.length === 0) {
+    //         alert('Input is empty');
+    //         return;
+    //     }
 
-        setFoodList([...foodList, newFood]);
+    //     var newFood: foodObj = {
+    //         FoodName: foodName,
+    //         FoodCalories: calorieInput,
+    //         MealName: currentMealName
+    //     };
 
-        //reseting input feilds
-        setCalorieInput(0);
-        setFoodName('');
-        setMealName('');
-    }
+    //     //setFoodList([...foodList, newFood]);
+    //     dispatch(foodActions.addFood(newFood));
+    //     dispatch(foodActions.finishedEnteringMeal);
+    // }
 
     useEffect(() => {
         localStorage.setItem('FoodList', JSON.stringify(foodList));
-    }, [foodList.length]);
-
-    //Update Calorie Sum when food list is updated
-    // useEffect(() => {
-    //     var calorieSum: number = 0;
-        
-    //     foodList.forEach((food: foodObj) => {
-    //         calorieSum += food.FoodCalories;
-    //     });
-
-    //     setCurrentCalories(calorieSum);
-    // }, [foodList.length]);
-
-    const currentCalories = foodList.reduce((sum, food) => sum + food.FoodCalories, 0);
-
-    const calorieGoalChangeDisplay = useMemo(() => {
-        if(calorieGoal <= 0) {
-            return (
-            <div>
-                <input type='number' value={tempCalorieInput} onChange={({target}) => {
-                    setTempCalorieInput(handleNumber(target.value));
-                }} />
-                <input type='button' value='Submit' onClick={() => {
-                    var input: number = handleNumber(tempCalorieInput);
-                    if(!input) {
-                        return;
-                    }
-                    localStorage.setItem('CalorieGoal', JSON.stringify(input));
-                    setCalorieGoal(input);
-                    setTempCalorieInput(0);
-                }} />
-            </div>)
-        }
-
-        return ( 
-            <button onClick={() => {
-            setCalorieGoal(0);
-            localStorage.removeItem('CalorieGoal');
-            }} >Change Calorie Goal</button>
-        )
-    }, [calorieGoal, tempCalorieInput]);
-
-    const foodRender = useMemo(() => {
-        var [breakfastList, lunchList, dinnerList, snackList]: foodObj[][] = [[],[],[],[]];
-        foodList.forEach((food: foodObj) => {
-            switch(food.MealName) {
-                case 'Breakfast':
-                    breakfastList.push(food);
-                    break;
-                case 'Lunch':
-                    lunchList.push(food);
-                    break;
-                case 'Dinner': 
-                    dinnerList.push(food);
-                    break;
-                case 'Snack':
-                    snackList.push(food);
-                    break;
-                default:
-                    console.log(`${food.FoodName} does not have a meal assigned to it.`);
-                    break;
-            }
-
-        });
-        return (
-            <>
-                <MealTime MealName='Breakfast' MealList={breakfastList} DeleteFoodCallBack={DeleteFood} AddToMealCallBack={(meal) => setMealName(meal)} />
-                <br />
-                <MealTime MealName='Lunch' MealList={lunchList} DeleteFoodCallBack={DeleteFood} AddToMealCallBack={(meal) => setMealName(meal)} />
-                <br />
-                <MealTime MealName='Dinner' MealList={dinnerList} DeleteFoodCallBack={DeleteFood} AddToMealCallBack={(meal) => setMealName(meal)} />
-                <br />
-                <MealTime MealName='Snack' MealList={snackList} DeleteFoodCallBack={DeleteFood} AddToMealCallBack={(meal) => setMealName(meal)} />
-            </>
-        )
     }, [foodList]);
+
+    const currentCalories: number = foodList.reduce((sum, food) => sum + food.FoodCalories, 0);
+
+    // const foodRender = useMemo(() => {
+    //     var [breakfastList, lunchList, dinnerList, snackList]: foodObj[][] = [[],[],[],[]];
+    //     foodList.forEach((food: foodObj) => {
+    //         switch(food.MealName) {
+    //             case 'Breakfast':
+    //                 breakfastList.push(food);
+    //                 break;
+    //             case 'Lunch':
+    //                 lunchList.push(food);
+    //                 break;
+    //             case 'Dinner': 
+    //                 dinnerList.push(food);
+    //                 break;
+    //             case 'Snack':
+    //                 snackList.push(food);
+    //                 break;
+    //             default:
+    //                 console.log(`${food.FoodName} does not have a meal assigned to it.`);
+    //                 break;
+    //         }
+
+    //     });
+    //     return (
+    //         <>
+    //             <MealTime MealName='Breakfast' MealList={breakfastList} />
+    //             <br />
+    //             <MealTime MealName='Lunch' MealList={lunchList} />
+    //             <br />
+    //             <MealTime MealName='Dinner' MealList={dinnerList} />
+    //             <br />
+    //             <MealTime MealName='Snack' MealList={snackList} />
+    //         </>
+    //     )
+    // }, [foodList]);
 
     return (
         <div>
             <h1>Hello Calories</h1>
-            {calorieGoalChangeDisplay}
+            <CalorieGoalChangeDisplay />
             <h1 id="calorie-display">{calorieGoal} - {currentCalories} = {calorieGoal-currentCalories}</h1>
             <div>
-                <FoodInput MealName={mealName} FoodName={foodName} HandleFoodNameChange={(e: string) => {setFoodName(e)}} CalorieInput={calorieInput} SetCalorieInputState={(e: number) => setCalorieInput(e)} AddCaloriesCallBack={AddCalories} />
-                
+                <FoodInput />
             </div>
             <div>
-                {foodRender}
+                <MealTime mealName='Breakfast' />
+                <br />
+                <MealTime mealName='Lunch' />
+                <br />
+                <MealTime mealName='Dinner' />
+                <br />
+                <MealTime mealName='Snack' />
             </div>
         </div>
     );
 }
 
+
+const CalorieGoalChangeDisplay = () => {
+    const { calorieGoal } = useSelector((state: RootType) => state.foodTracker);
+    const dispatch = useDispatch();
+    
+    function handleCalorieChange(form: React.FormEvent<HTMLFormElement>) {
+        form.preventDefault();
+        
+        //search the elements in the form through the current target property and search as HTMLInputElement.
+        const calorieInput: number = handleNumber((form.currentTarget.elements.namedItem('calorieInput') as HTMLInputElement).value);
+        if(!calorieInput) {
+            return;
+        }
+
+        localStorage.setItem('CalorieGoal', JSON.stringify(calorieInput));
+        dispatch(foodActions.changeCalorieGoal(calorieInput));
+    }
+    
+    if(calorieGoal <= 0) {
+        return (
+            <form onSubmit={handleCalorieChange}>
+            <input type='number' name='calorieInput'  />
+            <input type='submit' value='Submit' />
+        </form>)
+    }
+    
+    return ( 
+        <button onClick={() => {
+            dispatch(foodActions.changeCalorieGoal(0));
+            localStorage.removeItem('CalorieGoal');
+        }} >Change Calorie Goal</button>
+        )
+    }
+    
 interface FoodInputPropTypes {
     MealName: string;
     FoodName: string;
@@ -178,25 +178,46 @@ interface FoodInputPropTypes {
     SetCalorieInputState: (arg0: number) => void;
     AddCaloriesCallBack: () => void;
 }
+const FoodInput = () => {
+    const { currentMealName } = useSelector((state: RootType) => state.foodTracker);
+    const dispatch = useDispatch();
 
-const FoodInput = ({MealName, FoodName, HandleFoodNameChange, CalorieInput, SetCalorieInputState, AddCaloriesCallBack}: FoodInputPropTypes) => {
-    if(!MealName) {
+    function addFoodToList(form: React.FormEvent<HTMLFormElement>) {
+        form.preventDefault();
+
+        const foodName: string = (form.currentTarget.elements.namedItem('FoodName') as HTMLInputElement).value;
+        const foodCalories: number = handleNumber((form.currentTarget.elements.namedItem('FoodCalories') as HTMLInputElement).value);
+
+        if(foodName.length === 0) {
+            alert('Input is empty');
+            return;
+        }
+
+        var newFood: foodObj = {
+            FoodName: foodName,
+            FoodCalories: foodCalories,
+            MealName: currentMealName
+        };
+
+        //setFoodList([...foodList, newFood]);
+        dispatch(foodActions.addFood(newFood));
+        dispatch(foodActions.finishedEnteringMeal);
+    }
+
+    if(!currentMealName || currentMealName.length === 0) {
         return <></>;
     }
 
     return (
-        <div>
+        <form onSubmit={addFoodToList}>
             <label>Name</label>
-            <input type='text' value={FoodName} placeholder="Food Name" onChange={({target}) => HandleFoodNameChange(target.value)} />
+            <input type='text' name='FoodName' placeholder="Food Name" />
             <br />
             <label>Calories</label>
-            <input type='number' value={CalorieInput} onChange={({target}) => {
-                var inputValue: number = handleNumber(target.value);
-                SetCalorieInputState(inputValue);
-            }} />
+            <input type='number' name='FoodCalories' />
             <br />
-            <input type='button' value='Add Food' onClick={AddCaloriesCallBack} />
-        </div>
+            <input type='submit' value='Add Food' />
+        </form>
     );
 }
 
