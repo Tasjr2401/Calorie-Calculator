@@ -1,7 +1,10 @@
 import React, {SetStateAction, useEffect, useMemo, useState} from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { dispatch, RootType } from "./ReduxFiles/Store";
+import { workoutActions } from "./ReduxFiles/WorkoutSlice";
 import { handleNumber } from "./UsefulFunctions";
 
-type workout = {
+export interface Workout {
     Name: string,
     Weight: number,
     Sets: number,
@@ -9,38 +12,44 @@ type workout = {
 }
 
 const WorkoutTracker = () => {
-    const [workOutList, setWorkOutList]: [workout[], React.Dispatch<SetStateAction<workout[]>>] = useState(() => JSON.parse(localStorage.getItem('WorkOutList') || '[]'));
-    const [workOutName, setWorkOutName] = useState('');
-    const [weight, setWeight] = useState(0);
-    const [reps, setReps] = useState(0);
-    const [sets, setSets] = useState(0);
+    const { workoutList } = useSelector((state: RootType) => state.workoutTracker)
+    const dispatch = useDispatch();
 
-    function DeleteWorkOut(workOut: workout) {
-        setWorkOutList(prevList => prevList.filter(x => x !== workOut));
+    useEffect(() => {
+        const workoutArray: Workout[] = JSON.parse(localStorage.getItem('WorkoutList') || '[]');
+        dispatch(workoutActions.loadWorkouts(workoutArray));
+    }, []);
+
+    function DeleteWorkOut(workOut: Workout) {
+        dispatch(workoutActions.removeWorkout(workOut));
     }
 
-    function AddWorkout() {
+    function AddWorkout(form: React.FormEvent<HTMLFormElement>) {
+        form.preventDefault();
+
+        const workOutName: string = (form.currentTarget.elements.namedItem('WorkoutName') as HTMLInputElement).value;
+        const weight: number = handleNumber((form.currentTarget.elements.namedItem('Weight') as HTMLInputElement).value);
+        const sets: number = handleNumber((form.currentTarget.elements.namedItem('Sets') as HTMLInputElement).value);
+        const reps: number = handleNumber((form.currentTarget.elements.namedItem('Reps') as HTMLInputElement).value);
+
         if(workOutName.length <= 0 || sets <= 0 || reps <= 0) {
             alert('An Input Feild is missing its required information.');
             return;
         }
 
-        setWorkOutList([...workOutList, {
+        const workout: Workout = {
             Name: workOutName,
             Weight: weight,
             Sets: sets,
             Reps: reps
-        }]);
+        }
 
-        setWorkOutName('');
-        setWeight(0);
-        setReps(0);
-        setSets(0);
+        dispatch(workoutActions.addWorkout(workout));
     }
 
-    const workOutListRender = useMemo(() => {
-        return workOutList.map(e => 
-            <li key={workOutList.indexOf(e)}>
+    const workoutListRender = useMemo(() => {
+        return workoutList.map((e: Workout) => 
+            <li key={workoutList.indexOf(e)}>
                 <h1>{e.Name}</h1>
                 <h2>Weight in Ibs: {e.Weight}</h2>
                 <h2>Sets: {e.Sets}</h2>
@@ -50,55 +59,41 @@ const WorkoutTracker = () => {
                 }}>Delete Workout</button>
             </li>
         )
-    }, [workOutList.length]);
+    }, [workoutList]);
 
     const totalVolume: number = useMemo(() => {
         var volume: number = 0;
-        workOutList.forEach(e => {
+        workoutList.forEach(e => {
             volume += (e.Sets * e.Reps) * e.Weight;
         });
 
         return volume;
-    }, [workOutList.length]);
+    }, [workoutList]);
 
     useEffect(() => {
-        localStorage.setItem('WorkOutList', JSON.stringify(workOutList));
-    }, [workOutList.length]);
+        localStorage.setItem('WorkoutList', JSON.stringify(workoutList));
+    }, [workoutList]);
 
     return (
         <div>
             <h1>Your total volume for these workouts is {totalVolume} pounds</h1>
 
-            <form onSubmit={(e) => {
-                e.preventDefault();
-                AddWorkout();
-            }}>
-                <input value={workOutName} type='text' placeholder='Workout Name' onChange={({target}) => {
-                    setWorkOutName(target.value);
-                }}/>
+            <form onSubmit={AddWorkout}>
+                <input type='text' name='WorkoutName' placeholder='Workout Name' />
                 <br />
                 <label>Weight in Ibs: </label>
-                <input value={weight} type='number' onChange={({target}) => {
-                    var num: number = handleNumber(target.value);
-                    setWeight(num);
-                }} />
+                <input type='number' name='Weight' />
                 <br />
                 <label>Reps</label>
-                <input value={reps} type='number' onChange={({target}) => {
-                    var num: number = handleNumber(target.value);
-                    setReps(num);
-                }} />
+                <input name='Reps' type='number'  />
                 <br />
                 <label>Sets</label>
-                <input value={sets} type='number' onChange={({target}) => {
-                    var num: number = handleNumber(target.value);
-                    setSets(num);
-                }} />
+                <input type='number' name='Sets' />
                 <input type='submit' value='Submit' />
             </form>
 
             <ol>
-                {workOutListRender}
+                {workoutListRender}
             </ol>
         </div>
     );
