@@ -18,7 +18,7 @@ const MealTime = ({mealName}: MealTimePropTypes) => {
         if(!mealList || mealList.length === 0) {
             return <h2>Nothing has been added for this meal</h2>
         }
-        return mealList.map(food => 
+        return mealList.map((food: foodObj) => 
             <li key={mealList.indexOf(food)}>
                 <h3>{food.FoodName}<p>{food.FoodCalories}</p></h3>
                 <button onClick={() => dispatch(foodActions.removeFood(food))}>Delete</button>

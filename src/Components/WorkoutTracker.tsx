@@ -1,6 +1,6 @@
-import React, {SetStateAction, useEffect, useMemo, useState} from "react";
+import React, {useEffect, useMemo} from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { dispatch, RootType } from "./ReduxFiles/Store";
+import { RootType } from "./ReduxFiles/Store";
 import { workoutActions } from "./ReduxFiles/WorkoutSlice";
 import { handleNumber } from "./UsefulFunctions";
 
@@ -12,7 +12,7 @@ export interface Workout {
 }
 
 const WorkoutTracker = () => {
-    const { workoutList } = useSelector((state: RootType) => state.workoutTracker)
+    const { workoutList } = useSelector((state: RootType) => state.workoutTracker);
     const dispatch = useDispatch();
 
     useEffect(() => {
@@ -20,12 +20,7 @@ const WorkoutTracker = () => {
         dispatch(workoutActions.loadWorkouts(workoutArray));
     }, []);
 
-    function DeleteWorkOut(workOut: Workout) {
-        dispatch(workoutActions.removeWorkout(workOut));
-    }
-
     function AddWorkout(form: React.FormEvent<HTMLFormElement>) {
-        form.preventDefault();
 
         const workOutName: string = (form.currentTarget.elements.namedItem('WorkoutName') as HTMLInputElement).value;
         const weight: number = handleNumber((form.currentTarget.elements.namedItem('Weight') as HTMLInputElement).value);
@@ -46,20 +41,6 @@ const WorkoutTracker = () => {
 
         dispatch(workoutActions.addWorkout(workout));
     }
-
-    const workoutListRender = useMemo(() => {
-        return workoutList.map((e: Workout) => 
-            <li key={workoutList.indexOf(e)}>
-                <h1>{e.Name}</h1>
-                <h2>Weight in Ibs: {e.Weight}</h2>
-                <h2>Sets: {e.Sets}</h2>
-                <h2>Reps: {e.Reps}</h2>
-                <button onClick={() => {
-                    DeleteWorkOut(e);
-                }}>Delete Workout</button>
-            </li>
-        )
-    }, [workoutList]);
 
     const totalVolume: number = useMemo(() => {
         var volume: number = 0;
@@ -93,7 +74,15 @@ const WorkoutTracker = () => {
             </form>
 
             <ol>
-                {workoutListRender}
+                {workoutList.map((e: Workout) => 
+                    <li key={workoutList.indexOf(e)}>
+                        <h1>{e.Name}</h1>
+                        <h2>Weight in Ibs: {e.Weight}</h2>
+                        <h2>Sets: {e.Sets}</h2>
+                        <h2>Reps: {e.Reps}</h2>
+                        <button onClick={() => dispatch(workoutActions.removeWorkout(e))}>Delete Workout</button>
+                    </li>
+                )}
             </ol>
         </div>
     );

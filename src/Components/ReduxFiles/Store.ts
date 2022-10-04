@@ -1,5 +1,4 @@
-import { configureStore, ConfigureStoreOptions, Store } from '@reduxjs/toolkit';
-import { type } from '@testing-library/user-event/dist/type';
+import { configureStore } from '@reduxjs/toolkit';
 import { foodReducer } from './FoodSlice';
 import { workoutReducer } from './WorkoutSlice';
 

@@ -1,5 +1,4 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { Action } from 'history';
 import { foodObj } from '../Home';
 
 export interface FoodTrackerState {

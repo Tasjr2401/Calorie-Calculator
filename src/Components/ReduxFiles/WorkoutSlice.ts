@@ -15,6 +15,7 @@ const WorkoutSlice = createSlice({
     reducers: {
         loadWorkouts: (state = initialState, action: {payload: Workout[]}): WorkoutTrackerState => {
             return {
+                ...state,
                 workoutList: action.payload
             }
         },
@@ -28,7 +29,7 @@ const WorkoutSlice = createSlice({
             return {
                 ...state,
                 workoutList: state.workoutList.filter(x => x !== action.payload)
-            }
+            };
         }
     }
 });
