@@ -1,4 +1,4 @@
-export function handleNumber(num) {
+export function handleNumber(num: any): number {
     if(typeof num === 'number') {
         return num;
     }
@@ -9,3 +9,7 @@ export function handleNumber(num) {
     return tempVar;
 }
 
+export function generateID(): number {
+    const idFromDate: number = Date.now();
+    return idFromDate;
+}

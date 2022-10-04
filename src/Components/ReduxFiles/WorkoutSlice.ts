@@ -25,10 +25,10 @@ const WorkoutSlice = createSlice({
                 workoutList: [...state.workoutList, action.payload]
             }
         },
-        removeWorkout: (state = initialState, action: {payload: Workout}): WorkoutTrackerState => {
+        removeWorkout: (state = initialState, action: {payload: number}): WorkoutTrackerState => {
             return {
                 ...state,
-                workoutList: state.workoutList.filter(x => x !== action.payload)
+                workoutList: state.workoutList.filter(x => x.id !== action.payload)
             };
         }
     }

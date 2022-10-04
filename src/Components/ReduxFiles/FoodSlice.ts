@@ -31,10 +31,10 @@ const FoodTrackerSlice = createSlice({
                 foodList: [...state.foodList, action.payload]
             };
         },
-        removeFood: (state = initialState, action: {payload: foodObj}): FoodTrackerState => {
+        removeFood: (state = initialState, action: {payload: number}): FoodTrackerState => {
             return {
                 ...state,
-                foodList: state.foodList.filter(x => x !== action.payload)
+                foodList: state.foodList.filter(x => x.id !== action.payload)
             };
         },
         changeCalorieGoal: (state = initialState, action: {payload: number}): FoodTrackerState => {

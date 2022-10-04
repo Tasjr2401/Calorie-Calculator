@@ -1,14 +1,15 @@
 import React, {useEffect, useMemo, useState} from "react";
-import {handleNumber} from './UsefulFunctions';
+import {generateID, handleNumber} from './UsefulFunctions';
 import MealTime from './MealTime';
 import { useSelector, useDispatch } from "react-redux";
 import { foodActions } from "./ReduxFiles/FoodSlice";
 import { RootType } from "./ReduxFiles/Store";
 
-export type foodObj = {
-    FoodName: string,
-    FoodCalories: number,
-    MealName: string
+export interface foodObj {
+    id: number,
+    foodName: string,
+    foodCalories: number,
+    mealName: string
 };
 
 interface Fruit {
@@ -58,7 +59,7 @@ const CalorieTracker = () => {
         localStorage.setItem('FoodList', JSON.stringify(foodList));
     }, [foodList]);
 
-    const currentCalories: number = foodList.reduce((sum, food) => sum + food.FoodCalories, 0);
+    const currentCalories: number = foodList.reduce((sum, food) => sum + food.foodCalories, 0);
 
     return (
         <div>
@@ -130,10 +131,12 @@ const FoodInput = () => {
             return;
         }
 
+        const foodId: number = generateID();
         var newFood: foodObj = {
-            FoodName: foodName,
-            FoodCalories: foodCalories,
-            MealName: currentMealName
+            id: foodId,
+            foodName: foodName,
+            foodCalories: foodCalories,
+            mealName: currentMealName
         };
 
         //setFoodList([...foodList, newFood]);

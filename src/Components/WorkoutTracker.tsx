@@ -2,13 +2,14 @@ import React, {useEffect, useMemo} from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootType } from "./ReduxFiles/Store";
 import { workoutActions } from "./ReduxFiles/WorkoutSlice";
-import { handleNumber } from "./UsefulFunctions";
+import { generateID, handleNumber } from "./UsefulFunctions";
 
 export interface Workout {
-    Name: string,
-    Weight: number,
-    Sets: number,
-    Reps: number
+    id: number,
+    name: string,
+    weight: number,
+    sets: number,
+    reps: number
 }
 
 const WorkoutTracker = () => {
@@ -32,11 +33,13 @@ const WorkoutTracker = () => {
             return;
         }
 
+        const workoutId = generateID();
         const workout: Workout = {
-            Name: workOutName,
-            Weight: weight,
-            Sets: sets,
-            Reps: reps
+            id: workoutId,
+            name: workOutName,
+            weight: weight,
+            sets: sets,
+            reps: reps
         }
 
         dispatch(workoutActions.addWorkout(workout));
@@ -45,7 +48,7 @@ const WorkoutTracker = () => {
     const totalVolume: number = useMemo(() => {
         var volume: number = 0;
         workoutList.forEach(e => {
-            volume += (e.Sets * e.Reps) * e.Weight;
+            volume += (e.sets * e.reps) * e.weight;
         });
 
         return volume;
@@ -75,12 +78,12 @@ const WorkoutTracker = () => {
 
             <ol>
                 {workoutList.map((e: Workout) => 
-                    <li key={workoutList.indexOf(e)}>
-                        <h1>{e.Name}</h1>
-                        <h2>Weight in Ibs: {e.Weight}</h2>
-                        <h2>Sets: {e.Sets}</h2>
-                        <h2>Reps: {e.Reps}</h2>
-                        <button onClick={() => dispatch(workoutActions.removeWorkout(e))}>Delete Workout</button>
+                    <li key={e.id}>
+                        <h1>{e.name}</h1>
+                        <h2>Weight in Ibs: {e.weight}</h2>
+                        <h2>Sets: {e.sets}</h2>
+                        <h2>Reps: {e.reps}</h2>
+                        <button onClick={() => dispatch(workoutActions.removeWorkout(e.id))}>Delete Workout</button>
                     </li>
                 )}
             </ol>

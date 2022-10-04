@@ -14,14 +14,14 @@ const MealTime = ({mealName}: MealTimePropTypes) => {
     
     
     const mealListRender = useMemo(() => {
-        const mealList = foodList.filter(x => x.MealName === mealName)
+        const mealList = foodList.filter(x => x.mealName === mealName)
         if(!mealList || mealList.length === 0) {
             return <h2>Nothing has been added for this meal</h2>
         }
         return mealList.map((food: foodObj) => 
-            <li key={mealList.indexOf(food)}>
-                <h3>{food.FoodName}<p>{food.FoodCalories}</p></h3>
-                <button onClick={() => dispatch(foodActions.removeFood(food))}>Delete</button>
+            <li key={food.id}>
+                <h3>{food.foodName}<p>{food.foodCalories}</p></h3>
+                <button onClick={() => dispatch(foodActions.removeFood(food.id))}>Delete</button>
             </li>
         )}, [foodList]);
 
