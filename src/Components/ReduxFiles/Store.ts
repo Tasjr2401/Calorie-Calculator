@@ -1,11 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit';
+import { BookReducer } from './BookSlice';
 import { foodReducer } from './FoodSlice';
 import { workoutReducer } from './WorkoutSlice';
 
 const storeOptions = {
     reducer: {
         foodTracker: foodReducer,
-        workoutTracker: workoutReducer
+        workoutTracker: workoutReducer,
+        bookTracker: BookReducer
     }
 };
 

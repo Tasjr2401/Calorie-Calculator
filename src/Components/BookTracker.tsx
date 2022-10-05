@@ -1,108 +1,104 @@
 import React, { useMemo, useState, useEffect, SetStateAction } from "react";
-import { handleNumber } from "./UsefulFunctions";
+import { generateID, handleNumber } from "./UsefulFunctions";
 import '../Style.css';
-import { JsxElement } from "typescript";
+import { useSelector, useDispatch } from "react-redux";
+import { RootType } from "./ReduxFiles/Store";
+import { bookActions } from "./ReduxFiles/BookSlice";
 
-type book = {
-    Title: string,
-    Author: string,
-    PagesRead: number,
-    Completed: boolean,
-    LastUpdated: number
+export interface Book {
+    id: number,
+    title: string,
+    author: string,
+    pagesRead: number,
+    completed: boolean,
+    lastUpdated: number
 }
 
 const BookTracker = () => {
-    const [bookTitle, setBookTitle] = useState('');
-    const [bookAuthor, setBookAuthor] = useState('');
-    const [pagesRead, setPagesRead] = useState(0);
+    const { bookList } = useSelector((state: RootType) => state.bookTracker);
+    const dispatch = useDispatch();
 
-    const [bookList, setBookList]: [book[], React.Dispatch<SetStateAction<book[]>>] = useState(() => JSON.parse(localStorage.getItem('BookList') || '[]'));
+    useEffect(() => {
+        const bookArray: Book[] = JSON.parse(localStorage.getItem('BookList') || '[]');
+        dispatch(bookActions.loadBooks(bookArray));
+    },[]);
 
-    function AddBook(): void {
-        var tempArray: book[] = [{
-            Title: bookTitle,
-            Author: bookAuthor,
-            PagesRead: pagesRead,
-            Completed: false,
-            LastUpdated: Date.now()
-        }, ...bookList];
+    function AddBook(form: React.FormEvent<HTMLFormElement>): void {
+        const bookTitle: string = (form.currentTarget.elements.namedItem('BookTitle') as HTMLInputElement).value;
+        const bookAuthor: string = (form.currentTarget.elements.namedItem('Author') as HTMLInputElement).value;
+        const pagesRead: number = handleNumber((form.currentTarget.elements.namedItem('PagesRead') as HTMLInputElement).value);
 
-        setBookList(tempArray);
-    }
+        const bookId = generateID();
+        var tempArray: Book = {
+            id: bookId,
+            title: bookTitle,
+            author: bookAuthor,
+            pagesRead: pagesRead,
+            completed: false,
+            lastUpdated: Date.now()
+        };
 
-    function UpdateCompleted(e: book): void {
-        var tempArray: book[] = [...bookList];
-        var index = tempArray.indexOf(e);
-        tempArray[index].Completed = !e.Completed;
-        tempArray[index].LastUpdated = Date.now();
-
-        tempArray.sort((a, b) => {
-            return -1*(a.LastUpdated - b.LastUpdated);
-        });
-        setBookList(tempArray);
+        dispatch(bookActions.addBook(tempArray));
     }
 
     useEffect(() => {
         localStorage.setItem('BookList', JSON.stringify(bookList));
     }, [bookList]);
 
-    const [toReadListRender, finishedListRender] = useMemo(() => {
-        var readingListArray: JSX.Element[] = [];
-        var finishedListArray: JSX.Element[] = [];
-        bookList.map(e => {
-            var date: string | Date = new Date(e.LastUpdated);
-            date = date.toLocaleString('en-US');
-            let tempRender = (
-                <li key={bookList.indexOf(e)}>
-                    <h1>{e.Title}</h1>
-                    <h2>By {e.Author}</h2>
-                    <h3>Pages Read: {e.PagesRead}</h3>
-                    <label>Completed: </label>
-                    <input checked={e.Completed} type='checkbox' onChange={() => {
-                        UpdateCompleted(e);
-                    }} />
-                    <h3>Last updated: {date}</h3>
-                </li>
-            )
-            if(e.Completed === false) {
-                readingListArray.push(tempRender);
-            } else {
-                finishedListArray.push(tempRender);
-            }
-        });
-        return [readingListArray, finishedListArray];
-    }
-    , [bookList]);
-
     return (
         <div>
             <form onSubmit={AddBook}>
-                <input placeholder="Title" value={bookTitle} type='text' onChange={({target}) => {
-                    setBookTitle(target.value);
-                }} />
-                <input placeholder="Author" value={bookAuthor} type='text' onChange={({target}) => {
-                    setBookAuthor(target.value);
-                }} />
-                <input type='number' value={pagesRead} onChange={({target}) => {
-                    var input = handleNumber(target.value);
-                    setPagesRead(input);
-                }} />
+                <input placeholder="Title" name="BookTitle" type='text' />
+                <input placeholder="Author" name="Author" type='text' />
+                <input type='number' name="PagesRead" />
                 <input type='submit' value='Submit' />
             </form>
             <div className="row">
                 <div className="column">
                     <label><h1>Reading List</h1></label>
                     <ol>
-                        {toReadListRender}
+                        <BookListRender completed={false} />
                     </ol>
                 </div>
                 <div className="column">
                     <label><h1>Finished Books</h1></label>
                     <ol>
-                        {finishedListRender}
+                        <BookListRender completed={true} />
                     </ol>
                 </div>
             </div>
+        </div>
+    )
+}
+
+interface BookListRenderProps {
+    completed: boolean
+}
+
+const BookListRender = ({ completed }: BookListRenderProps) => {
+    const { bookList } = useSelector((state: RootType) => state.bookTracker);
+    const dispatch = useDispatch();
+
+    return (
+        <div>
+            {bookList.map(e => {
+                if(e.completed === completed) {
+                    var date: string | Date = new Date(e.lastUpdated);
+                    date = date.toLocaleString('en-US');
+                    return (
+                        <li key={e.id}>
+                            <h1>{e.title}</h1>
+                            <h2>By {e.author}</h2>
+                            <h3>Pages Read: {e.pagesRead}</h3>
+                            <label>Completed: </label>
+                            <input checked={e.completed} type='checkbox' onChange={() => {
+                                dispatch(bookActions.toggleCompleted(e.id));
+                            }} />
+                            <h3>Last updated: {date}</h3>
+                        </li>
+                    )
+                }
+            })}
         </div>
     )
 }
